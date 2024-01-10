@@ -5,7 +5,7 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 {
 	/// <summary>
 	/// Service class for the Client that fetches products from the database and holds a list
-	/// of all products for other componenets to use
+	/// of all products for other componenets to use.
 	/// </summary>
 	public class ProductService : IProductService
 	{

@@ -11,11 +11,24 @@
     text-align: center;
 }
 
+.media {
+    display: flex;
+    align-items: flex-start;
+}
+
+.media-body {
+    flex: 1;
+}
+
 .price {
     color: green;
 }
 
 @media (max-width: 1023.98px) {
+    .media {
+        flex-direction: column;
+    }
+
     .media-img{
         max-width: 300px;
     }

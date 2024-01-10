@@ -34,7 +34,7 @@ else
 		var result = await ProductService.GetProductbyIdAsync(Id);
 
 		if (result.Success == false)
-			message = result.Message;
+			message = $"Could not find product with the id {Id}";
 		else
 			product = result.Data;
 	}
