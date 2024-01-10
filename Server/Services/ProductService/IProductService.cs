@@ -6,5 +6,6 @@ namespace BlazorEcommerce.Server.Services.ProductService
 	{
 		public Task<ServiceResponse<List<Product>>> GetProductsAsync();
 		public Task<ServiceResponse<Product>> GetProductByIdAsync(int productId);
-	}
+        public Task<ServiceResponse<List<Product>>> GetProductsByCategoryAsync(string category);
+    }
 }
