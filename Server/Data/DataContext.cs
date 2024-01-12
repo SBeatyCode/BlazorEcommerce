@@ -11,6 +11,24 @@ namespace BlazorEcommerce.Server.Data
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
+			//Building the composite key
+			modelBuilder.Entity<ProductVarient>()
+				.HasKey(p => new {p.ProductId, p.ProductTypeId});
+
+			modelBuilder.Entity<ProductType>().HasData(
+				new ProductType { Id = 1, Name = "Default" },
+				new ProductType { Id = 2, Name = "Paperback" },
+				new ProductType { Id = 3, Name = "Audiobook" },
+				new ProductType { Id = 4, Name = "E-Book" },
+				new ProductType { Id = 5, Name = "DVD" },
+				new ProductType { Id = 6, Name = "Blu-Ray" },
+				new ProductType { Id = 7, Name = "Digital" },
+				new ProductType { Id = 8, Name = "Nintendo Switch" },
+				new ProductType { Id = 9, Name = "PlayStation 4" },
+				new ProductType { Id = 10, Name = "XBox One" },
+				new ProductType { Id = 11, Name = "Game Console" }
+			);
+
 			modelBuilder.Entity<Category>().HasData(
 				new Category
 				{
@@ -39,7 +57,6 @@ namespace BlazorEcommerce.Server.Data
 					Name = "Gideon the Ninth",
 					Description = "Gideon the Ninth is a 2019 science fantasy novel by the New Zealand writer Tamsyn Muir. It is Muir's debut novel and the first in her Locked Tomb series",
 					ImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/6/66/Gideon_the_Ninth_-_US_hardback_print_cover.jpg/220px-Gideon_the_Ninth_-_US_hardback_print_cover.jpg",
-					Price = 12.99m,
 					CategoryId = 1
 				},
 				new Product
@@ -48,7 +65,6 @@ namespace BlazorEcommerce.Server.Data
 					Name = "Harrow the Ninth",
 					Description = "Harrow the Ninth is a 2020 science fantasy novel by the New Zealand writer Tamsyn Muir. It is the second in Muir's Locked Tomb series",
 					ImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/0/02/Harrow_the_Ninth.jpg/220px-Harrow_the_Ninth.jpg",
-					Price = 12.99m,
 					CategoryId = 1
 				},
 				new Product
@@ -57,7 +73,6 @@ namespace BlazorEcommerce.Server.Data
 					Name = "Nona the Ninth",
 					Description = "Nona the Ninth is a 2022 science fantasy novel by the New Zealand writer Tamsyn Muir. It is the third book in the Locked Tomb series",
 					ImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/8/81/Nona_the_Ninth.jpg/220px-Nona_the_Ninth.jpg",
-					Price = 15.99m,
 					CategoryId = 1
 				},
 				new Product
@@ -125,9 +140,196 @@ namespace BlazorEcommerce.Server.Data
 					ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/e/ee/Nintendo-Super-Famicom-Set-FL.jpg",
 				}
 			);
+
+			modelBuilder.Entity<ProductVarient>().HasData(
+				new ProductVarient
+				{
+					ProductId = 1,
+					ProductTypeId = 2,
+					Price = 12.99m,
+					OriginalPrice = 18.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 1,
+					ProductTypeId = 3,
+					Price = 18.99m,
+					OriginalPrice = 28.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 1,
+					ProductTypeId = 4,
+					Price = 9.99m,
+					OriginalPrice = 15.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 2,
+					ProductTypeId = 2,
+					Price = 12.99m,
+					OriginalPrice = 18.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 2,
+					ProductTypeId = 3,
+					Price = 18.99m,
+					OriginalPrice = 28.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 2,
+					ProductTypeId = 4,
+					Price = 9.99m,
+					OriginalPrice = 15.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 3,
+					ProductTypeId = 2,
+					Price = 12.99m,
+					OriginalPrice = 18.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 3,
+					ProductTypeId = 3,
+					Price = 18.99m,
+					OriginalPrice = 28.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 3,
+					ProductTypeId = 4,
+					Price = 9.99m,
+					OriginalPrice = 15.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 4,
+					ProductTypeId = 5,
+					Price = 5.99m,
+					OriginalPrice = 9.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 4,
+					ProductTypeId = 6,
+					Price = 10.99m,
+					OriginalPrice = 20.50m
+				},
+				new ProductVarient
+				{
+					ProductId = 5,
+					ProductTypeId = 5,
+					Price = 9.99m,
+					OriginalPrice = 15.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 5,
+					ProductTypeId = 7,
+					Price = 12.99m,
+					OriginalPrice = 18.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 6,
+					ProductTypeId = 5,
+					Price = 8.99m,
+					OriginalPrice = 18.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 6,
+					ProductTypeId = 6,
+					Price = 19.99m,
+					OriginalPrice = 19.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 6,
+					ProductTypeId = 7,
+					Price = 9.99m,
+					OriginalPrice = 25.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 7,
+					ProductTypeId = 9,
+					Price = 20.99m,
+					OriginalPrice = 59.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 7,
+					ProductTypeId = 10,
+					Price = 22.99m,
+					OriginalPrice = 59.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 7,
+					ProductTypeId = 7,
+					Price = 9.99m,
+					OriginalPrice = 59.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 8,
+					ProductTypeId = 7,
+					Price = 20.99m,
+					OriginalPrice = 20.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 8,
+					ProductTypeId = 8,
+					Price = 16.99m,
+					OriginalPrice = 20.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 8,
+					ProductTypeId = 9,
+					Price = 16.99m,
+					OriginalPrice = 20.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 9,
+					ProductTypeId = 8,
+					Price = 59.99m,
+					OriginalPrice = 28.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 9,
+					ProductTypeId = 7,
+					Price = 59.99m,
+					OriginalPrice = 15.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 10,
+					ProductTypeId = 11,
+					Price = 79.99m,
+					OriginalPrice = 79.99m
+				},
+				new ProductVarient
+				{
+					ProductId = 11,
+					ProductTypeId = 11,
+					Price = 99.99m,
+					OriginalPrice = 15.99m
+				}
+			);
 		}
 
 		public DbSet<Product> Products { get; set; }
 		public DbSet<Category> Categories { get; set; }
+		public DbSet<ProductVarient> ProductVarients { get; set; }
+		public DbSet<ProductType> ProductTypes { get; set; }
 	}
 }

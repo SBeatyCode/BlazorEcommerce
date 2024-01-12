@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 namespace BlazorEcommerce.Shared
 {
 	/// <summary>
-	/// Rge Category into which a Product can be sorted (example, Book, Movie, etc)
+	/// The Category into which a Product can be sorted (example, Book, Movie, etc). This
+	/// is used for presenting and organizing products for the Ecommerce Site itself.
+	/// The class 'ProductType' represents the actual varients that the ProductVarient
+	///  can have
 	/// </summary>
 	public class Category
 	{
