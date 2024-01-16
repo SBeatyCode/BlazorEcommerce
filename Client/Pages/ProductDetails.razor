@@ -15,7 +15,28 @@ else
 		<div class="media-body">
 			<h2>@product.Name</h2>
 			<p>@product.Description</p>
-			<h4 class="price">$@*product.Price*@</h4>
+			@if(product.Varients != null && product.Varients.Count > 1)
+			{
+				<div class="mb-3">
+					<select class="form-select" @bind="currentTypeId">
+						@foreach (ProductVarient varient in product.Varients)
+						{
+							<option value="@varient.ProductTypeId">
+								@varient.ProductType.Name
+							</option>
+						}
+					</select>
+				</div>
+			}
+			@if (GetSelectedProductVarient().OriginalPrice > GetSelectedProductVarient().Price)
+			{
+				<h6 class="text-muted original-price">
+					$@GetSelectedProductVarient().OriginalPrice
+				</h6>
+			}
+			<h4 class="price">
+				$@GetSelectedProductVarient().Price
+			</h4>
 		</div>
 	</div>
 }
@@ -23,6 +44,7 @@ else
 @code {
 	private Product? product = null;
 	private string message = string.Empty;
+	private int currentTypeId = 1;
 
 	[Parameter]
 	public int Id { get; set; }
@@ -33,10 +55,30 @@ else
 
 		var result = await ProductService.GetProductbyIdAsync(Id);
 
-		if (result.Success == false)
+		if (result.Success == false || result.Data == null)
+		{
 			message = $"Could not find product with the id {Id}";
+		}
 		else
+		{
 			product = result.Data;
+
+			if(product.Varients.Count > 0)
+			{
+				currentTypeId = product.Varients[0].ProductTypeId;
+			}
+		}
+	}
+
+	/// <summary>
+	/// Gets the PorductVarient for the product based on the currentTypeID
+	/// (which matches a ProductType) that is selected by the user
+	/// </summary>
+	/// <returns></returns>
+	private ProductVarient GetSelectedProductVarient()
+	{
+		ProductVarient varient = product.Varients.FirstOrDefault(v => v.ProductTypeId == currentTypeId);
+		return varient;
 	}
 
 }
