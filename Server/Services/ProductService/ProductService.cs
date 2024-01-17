@@ -63,7 +63,7 @@ namespace BlazorEcommerce.Server.Services.ProductService
 			var response = new ServiceResponse<List<Product>>
 			{
 				Data = await _context.Products
-					.Where(p => p.Category.Url.ToLower().Equals(categoryUrl.ToLower()))
+					.Where(p => p.Category!.Url.ToLower().Equals(categoryUrl.ToLower()))
 					.Include(p => p.Varients)
 					.ToListAsync()
 			};
@@ -81,5 +81,90 @@ namespace BlazorEcommerce.Server.Services.ProductService
 
 			return response;
 		}
-    }
+
+		public async Task<ServiceResponse<List<Product>>> SearchProducts(string searchText)
+		{
+			var response = new ServiceResponse<List<Product>>
+			{
+				Data = await FindProductsBySearchText(searchText)
+			};
+
+			if (response.Data != null)
+			{
+				response.Success = true;
+				response.Message = "The operation was succesful!";
+			}
+			else
+			{
+				response.Success = false;
+				response.Message = "No Products Found";
+			}
+
+			return response;
+		}
+
+		public async Task<ServiceResponse<List<string>>> ProductSearchSuggestions(string searchText)
+		{
+			var response = new ServiceResponse<List<string>>();
+
+			List<string> suggestions = new List<string>();
+			List<Product>? products = await FindProductsBySearchText(searchText);
+
+			if(products != null)
+			{
+				foreach (var product in products)
+				{
+					if (product.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+					{
+						suggestions.Add(product.Name);
+					}
+					if(product.Description != null)
+					{
+						//remove punctutation and make product description into an array of strings
+						var punctuation = product.Description.Where(char.IsPunctuation)
+							.Distinct().ToArray();
+						var words = product.Description.Split()
+							.Select(s => s.Trim());
+
+						foreach (var word in words) 
+						{
+							if(word.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+								&& !suggestions.Contains(word))
+							{ 
+								suggestions.Add(word); 
+							}
+						}
+					}
+				}
+
+				response.Data = suggestions;
+				response.Success = true;
+				response.Message = "Opperation success";
+			}
+			else
+			{
+				response.Data = null;
+				response.Success = false;
+				response.Message = "Could not retrieve a list of search suggestions";
+			}
+			
+			return response;
+		}
+
+		/// <summary>
+		/// Performs a querry to find a match from searchText in a product's name or
+		/// description, returns the result as a List<Product> of any matches
+		/// </summary>
+		/// <param name="searchText">The text to search for in the query</param>
+		/// <returns></returns>
+		private async Task<List<Product>> FindProductsBySearchText(string searchText)
+		{
+			return await _context.Products
+						.Where(p => p.Name.ToLower().Contains(searchText.ToLower())
+						||
+						p.Description.ToLower().Contains(searchText.ToLower()))
+						.Include(p => p.Varients)
+						.ToListAsync();
+		}
+	}
 }

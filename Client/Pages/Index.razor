@@ -1,5 +1,6 @@
 ﻿@page "/"
 @page "/{categoryUrl}"
+@page "/search/{searchText}"
 @using BlazorEcommerce.Client.Services.ProductServices;
 @inject IProductService ProductService
 
@@ -12,8 +13,18 @@
 	[Parameter]
 	public string? CategoryUrl { get; set; } = null;
 
+	[Parameter]
+	public string? SearchText { get; set; } = null;
+
 	protected override async Task OnParametersSetAsync()
 	{
-		await ProductService.GetProductsAsync(CategoryUrl);
+		if (SearchText != null)
+		{
+			await ProductService.SearchProducts(SearchText);
+		}
+		else
+		{
+			await ProductService.GetProductsAsync(CategoryUrl);
+		}
 	}
 }

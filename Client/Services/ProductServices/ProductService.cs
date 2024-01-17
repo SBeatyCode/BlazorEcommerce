@@ -9,16 +9,17 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 	/// </summary>
 	public class ProductService : IProductService
 	{
+		public List<Product> Products { get; set; } = new List<Product>();
+		public string Message { get; set; }
+
 		private readonly HttpClient _httpClient;
+
+		public event Action ProductsChanged;
 
 		public ProductService(HttpClient httpClient)
 		{
 			_httpClient = httpClient;
 		}
-
-        public event Action ProductsChanged;
-
-        public List<Product> Products { get; set; } = new List<Product>();
 
 		public async Task<ServiceResponse<Product>> GetProductbyIdAsync(int productId)
 		{
@@ -26,6 +27,12 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 			return result;
 		}
 
+		/// <summary>
+		/// Searches for Products. If CategoryUrl is provided, will search using that
+		/// category, otherwise will return all products.
+		/// </summary>
+		/// <param name="categoryUrl">The Category to search for (optional)</param>
+		/// <returns></returns>
 		public async Task GetProductsAsync(string? categoryUrl = null)
 		{
 			var result = categoryUrl == null ?
@@ -39,6 +46,28 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 			}
 
 			ProductsChanged.Invoke();
+		}
+
+		public async Task SearchProducts(string searchText)
+		{
+			var result = await _httpClient.GetFromJsonAsync<ServiceResponse<List<Product>>>($"api/product/search/{searchText}");
+
+			if (result != null && result.Data != null)
+			{
+				Products = result.Data;
+			}
+
+			if (Products.Count == 0)
+				Message = "No Products Found";
+
+			ProductsChanged.Invoke();
+		}
+
+		public async Task<List<string>> GetProductSearchSuggestions(string searchText)
+		{
+			var result = await _httpClient.GetFromJsonAsync<ServiceResponse<List<string>>>($"api/product/search_suggestions/{searchText}");
+
+			return result.Data;
 		}
 	}
 }
