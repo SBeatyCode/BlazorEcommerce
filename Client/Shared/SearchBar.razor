@@ -18,7 +18,7 @@
 			<option>@suggestion</option>
 		}
 	</datalist>
-	<div class="input-group">
+	<div class="input-group-append">
 		<button class="btn btn-primary" @onclick="SearchProducts">
 			<span class="oi oi-magnifying-glass"></span>
 		</button>
@@ -45,6 +45,7 @@
 
 	public async Task HandleSearch(KeyboardEventArgs args)
 	{
+		//If clicking off or hitting Enter
 		if (args.Key == null || args.Key.Equals("Enter"))
 		{
 			SearchProducts();

@@ -6,7 +6,14 @@
 
 <PageTitle>My Shop</PageTitle>
 
-<ProductList />
+@if((CategoryUrl == null || CategoryUrl == string.Empty) && (SearchText == null || SearchText == string.Empty))
+{
+	<FeaturedProducts />
+}
+else
+{
+	<ProductList />
+}
 
 @code
 {

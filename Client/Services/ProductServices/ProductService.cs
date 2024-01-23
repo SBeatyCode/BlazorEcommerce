@@ -1,5 +1,6 @@
 ﻿using BlazorEcommerce.Shared;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 
 namespace BlazorEcommerce.Client.Services.ProductServices
 {
@@ -29,14 +30,14 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 
 		/// <summary>
 		/// Searches for Products. If CategoryUrl is provided, will search using that
-		/// category, otherwise will return all products.
+		/// category, otherwise will return Featured products.
 		/// </summary>
 		/// <param name="categoryUrl">The Category to search for (optional)</param>
 		/// <returns></returns>
 		public async Task GetProductsAsync(string? categoryUrl = null)
 		{
 			var result = categoryUrl == null ?
-				await _httpClient.GetFromJsonAsync<ServiceResponse<List<Product>>>("api/product") :
+				await _httpClient.GetFromJsonAsync<ServiceResponse<List<Product>>>("api/product/featured") :
 				await _httpClient.GetFromJsonAsync<ServiceResponse<List<Product>>>($"api/product/category/{categoryUrl}");
 
 
@@ -66,7 +67,6 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 		public async Task<List<string>> GetProductSearchSuggestions(string searchText)
 		{
 			var result = await _httpClient.GetFromJsonAsync<ServiceResponse<List<string>>>($"api/product/search_suggestions/{searchText}");
-
 			return result.Data;
 		}
 	}

@@ -1,0 +1,12 @@
+﻿@inject NavigationManager NavigationManager
+
+<button @onclick="GoHome" class="btn btn-primary btn-home">
+	My Shop
+</button>
+
+@code {
+	public void GoHome()
+	{
+		NavigationManager.NavigateTo("");
+	}
+}

@@ -73,7 +73,8 @@ namespace BlazorEcommerce.Server.Data
 					Name = "Nona the Ninth",
 					Description = "Nona the Ninth is a 2022 science fantasy novel by the New Zealand writer Tamsyn Muir. It is the third book in the Locked Tomb series",
 					ImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/8/81/Nona_the_Ninth.jpg/220px-Nona_the_Ninth.jpg",
-					CategoryId = 1
+					CategoryId = 1,
+					Featured = true
 				},
 				new Product
 				{
@@ -97,7 +98,8 @@ namespace BlazorEcommerce.Server.Data
 					CategoryId = 2,
 					Name = "Toy Story",
 					Description = "Toy Story is a 1995 American computer-animated comedy film produced by Pixar Animation Studios and released by Walt Disney Pictures. The first installment in the Toy Story franchise, it was the first entirely computer-animated feature film, as well as the first feature film from Pixar. The film was directed by John Lasseter (in his feature directorial debut), and written by Joss Whedon, Andrew Stanton, Joel Cohen, and Alec Sokolow from a story by Lasseter, Stanton, Pete Docter, and Joe Ranft. The film features music by Randy Newman, was produced by Bonnie Arnold and Ralph Guggenheim, and was executive-produced by Steve Jobs and Edwin Catmull. The film features the voices of Tom Hanks, Tim Allen, Don Rickles, Wallace Shawn, John Ratzenberger, Jim Varney, Annie Potts, R. Lee Ermey, John Morris, Laurie Metcalf, and Erik von Detten. Taking place in a world where anthropomorphic toys come to life when humans are not present, the plot focuses on the relationship between an old-fashioned pull-string cowboy doll named Woody and an astronaut action figure, Buzz Lightyear, as they evolve from rivals competing for the affections of their owner, Andy Davis, to friends who work together to be reunited with Andy after being separated from him.",
-					ImageUrl = "https://upload.wikimedia.org/wikipedia/en/1/13/Toy_Story.jpg"
+					ImageUrl = "https://upload.wikimedia.org/wikipedia/en/1/13/Toy_Story.jpg",
+					Featured = true
 				},
 				new Product
 				{
@@ -121,7 +123,8 @@ namespace BlazorEcommerce.Server.Data
 					CategoryId = 3,
 					Name = "Pokémon Legends: Arceus",
 					Description = "Pokémon Legends: Arceus[a] is a 2022 action role-playing game developed by Game Freak and published by Nintendo and The Pokémon Company for the Nintendo Switch. It is part of the eighth generation of the Pokémon video game series and serves as a prequel to Pokémon Diamond and Pearl (2006).",
-					ImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Pokemon_Legends_Arceus_cover.jpg/220px-Pokemon_Legends_Arceus_cover.jpg"
+					ImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Pokemon_Legends_Arceus_cover.jpg/220px-Pokemon_Legends_Arceus_cover.jpg",
+					Featured = true
 				},
 				new Product
 				{

@@ -72,5 +72,16 @@ namespace BlazorEcommerce.Server.Controllers
 			else
 				return NotFound(response);
 		}
+
+		[HttpGet("featured")]
+		public async Task<ActionResult<ServiceResponse<List<Product>>>> GetFeaturedProducts()
+		{
+			var response = await _productService.GetFeaturedProducts();
+
+			if (response != null && response.Data != null)
+				return Ok(response);
+			else
+				return NotFound(response);
+		}
 	}
 }

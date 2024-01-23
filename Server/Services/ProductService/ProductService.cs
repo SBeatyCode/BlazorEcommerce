@@ -151,6 +151,31 @@ namespace BlazorEcommerce.Server.Services.ProductService
 			return response;
 		}
 
+		public async Task<ServiceResponse<List<Product>>> GetFeaturedProducts()
+		{
+			var response = new ServiceResponse<List<Product>>();
+
+			var featured = await _context.Products
+				.Where(p => p.Featured == true)
+				.Include(p => p.Varients)
+				.ToListAsync();
+
+			if(featured == null)
+			{
+				response.Data = null;
+				response.Success = false;
+				response.Message = "Could not get Featured Products";
+			}
+			else
+			{
+				response.Data = featured;
+				response.Success = true;
+				response.Message = "Operation was a success";
+			}
+
+			return response;
+		}
+
 		/// <summary>
 		/// Performs a querry to find a match from searchText in a product's name or
 		/// description, returns the result as a List<Product> of any matches
