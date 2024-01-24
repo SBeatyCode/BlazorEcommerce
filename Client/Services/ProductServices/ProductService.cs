@@ -1,4 +1,5 @@
 ﻿using BlazorEcommerce.Shared;
+using BlazorEcommerce.Shared.DTOs;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
@@ -12,6 +13,9 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 	{
 		public List<Product> Products { get; set; } = new List<Product>();
 		public string Message { get; set; }
+		public int CurrentPage { get; set; }
+		public int PageCount { get; set; }
+		public string CurrentSearchText { get; set; } = string.Empty;
 
 		private readonly HttpClient _httpClient;
 
@@ -25,7 +29,15 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 		public async Task<ServiceResponse<Product>> GetProductbyIdAsync(int productId)
 		{
 			var result = await _httpClient.GetFromJsonAsync<ServiceResponse<Product>>($"api/product/{productId}");
-			return result;
+			
+			if (result == null || result.Data == null)
+			{
+				return new ServiceResponse<Product>();
+			}
+			else
+			{
+				return result;
+			}
 		}
 
 		/// <summary>
@@ -45,21 +57,39 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 			{
 				Products = result.Data;
 			}
+			else 
+			{
+				Products = new List<Product>();
+			}
+
+			CurrentPage = 1;
+			PageCount = 1;
+
+			if (Products == null || Products.Count == 0)
+				Message = "No Products Found";
 
 			ProductsChanged.Invoke();
 		}
 
-		public async Task SearchProducts(string searchText)
+		public async Task SearchProducts(string searchText, int page)
 		{
-			var result = await _httpClient.GetFromJsonAsync<ServiceResponse<List<Product>>>($"api/product/search/{searchText}");
+			var result = await _httpClient.GetFromJsonAsync<ServiceResponse<ProductSearchResult>>($"api/product/search/{searchText}/{page}");
 
 			if (result != null && result.Data != null)
 			{
-				Products = result.Data;
+				Products = result.Data.Products;
+				PageCount = result.Data.PageCount;
+				CurrentPage = result.Data.CurrentPage;
+			}
+			else
+			{
+				Products = new List<Product>();
 			}
 
 			if (Products.Count == 0)
 				Message = "No Products Found";
+
+			CurrentSearchText = searchText;
 
 			ProductsChanged.Invoke();
 		}
@@ -67,7 +97,15 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 		public async Task<List<string>> GetProductSearchSuggestions(string searchText)
 		{
 			var result = await _httpClient.GetFromJsonAsync<ServiceResponse<List<string>>>($"api/product/search_suggestions/{searchText}");
-			return result.Data;
+
+			if (result == null || result.Data == null)
+			{
+				return new List<string>();
+			}
+			else
+			{
+				return result.Data;
+			}
 		}
 	}
 }

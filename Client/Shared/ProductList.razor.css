@@ -24,6 +24,11 @@
     text-align: center;
 }
 
+.page-selection{
+    margin-right: 15px;
+    margin-bottom: 15px;
+}
+
 .price{
     color:green;
 }

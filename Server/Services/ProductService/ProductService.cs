@@ -1,5 +1,6 @@
 ﻿using BlazorEcommerce.Server.Data;
 using BlazorEcommerce.Shared;
+using BlazorEcommerce.Shared.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlazorEcommerce.Server.Services.ProductService
@@ -82,14 +83,35 @@ namespace BlazorEcommerce.Server.Services.ProductService
 			return response;
 		}
 
-		public async Task<ServiceResponse<List<Product>>> SearchProducts(string searchText)
+		public async Task<ServiceResponse<ProductSearchResult>> SearchProducts(string searchText, int page)
 		{
-			var response = new ServiceResponse<List<Product>>
+			if(page < 1) page = 1;
+
+			var productsPerPage = 3f;
+			var pageCount = Math.Ceiling((await FindProductsBySearchText(searchText)).Count / productsPerPage);
+			
+			//Return list of products based on the current page number, and only get
+			//enough products that will fill a page
+			var products = await _context.Products
+						.Where(p => p.Name.ToLower().Contains(searchText.ToLower())
+						||
+						p.Description.ToLower().Contains(searchText.ToLower()))
+						.Include(p => p.Varients)
+						.Skip((page - 1) * (int)productsPerPage)
+						.Take((int)productsPerPage)
+						.ToListAsync();
+
+			var response = new ServiceResponse<ProductSearchResult>
 			{
-				Data = await FindProductsBySearchText(searchText)
+				Data = new ProductSearchResult
+				{
+					Products = products,
+					PageCount = (int)pageCount,
+					CurrentPage = page
+				}
 			};
 
-			if (response.Data != null)
+			if (response.Data != null && products != null)
 			{
 				response.Success = true;
 				response.Message = "The operation was succesful!";

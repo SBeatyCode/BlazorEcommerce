@@ -29,6 +29,14 @@ else
 			</li>
 		}
 	</ul>
+	for (var pageNumber = 1; pageNumber <= ProductService.PageCount; pageNumber++)
+	{
+		<a class="btn, page-selection, 
+			@(pageNumber == ProductService.CurrentPage ? "btn-info" : "btn-outline-info")"
+			href="/search/@ProductService.CurrentSearchText/@pageNumber">
+			@pageNumber
+		</a>
+	}
 }
 
 @code {
