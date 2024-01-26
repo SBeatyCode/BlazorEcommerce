@@ -1,6 +1,8 @@
 ﻿@page "/product/{id:int}"
-@inject IProductService ProductService
+@using BlazorEcommerce.Client.Services.CartService;
 @using BlazorEcommerce.Client.Services.ProductServices;
+@inject IProductService ProductService
+@inject ICartService CartService
 
 @if (product == null)
 {
@@ -28,15 +30,21 @@ else
 					</select>
 				</div>
 			}
-			@if (GetSelectedProductVarient().OriginalPrice > GetSelectedProductVarient().Price)
+			@if (GetSelectedProductVarient() != null)
 			{
-				<h6 class="text-muted original-price">
-					$@GetSelectedProductVarient().OriginalPrice
-				</h6>
+				@if (GetSelectedProductVarient().OriginalPrice > GetSelectedProductVarient().Price)
+				{
+					<h6 class="text-muted original-price">
+						$@GetSelectedProductVarient().OriginalPrice
+					</h6>
+				}
+				<h4 class="price">
+					$@GetSelectedProductVarient().Price
+				</h4>
 			}
-			<h4 class="price">
-				$@GetSelectedProductVarient().Price
-			</h4>
+			<button class="btn btn-primary" @onclick="AddToCart">
+				<i class="oi oi-cart"></i>&nbsp;&nbsp;&nbsp;Add to Cart
+			</button>
 		</div>
 	</div>
 }
@@ -81,4 +89,16 @@ else
 		return varient;
 	}
 
+	private async Task AddToCart()
+	{
+		ProductVarient product = GetSelectedProductVarient();
+
+		CartItem cartItem = new CartItem
+		{
+			ProductId = product.ProductId,
+			ProductTypeId = product.ProductTypeId
+		};
+
+		await CartService.AddToCart(cartItem);
+	}
 }

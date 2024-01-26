@@ -1,0 +1,31 @@
+﻿@using BlazorEcommerce.Client.Services.CartService;
+@inject ICartService CartService
+@inject ISyncLocalStorageService LocalStorage
+@implements IDisposable
+
+@* This component represents the counter icon for the Cart *@
+
+<a href="cart" class="btn btn-info">
+	<i class="oi oi-cart"></i>
+	<span class="badge">@GetCartItemsCount</span>
+</a>
+
+@code {
+	private int GetCartItemsCount()
+	{
+		var cart = LocalStorage.GetItem<List<CartItem>>("cart");
+
+		//return cart != null ? cart.Count : 0;
+		return cart != null ? cart.Sum(i => i.Quantity) : 0;
+	}
+
+	protected override void OnInitialized()
+	{
+		CartService.OnCartChange += StateHasChanged;
+	}
+
+	public void Dispose()
+	{
+		CartService.OnCartChange -= StateHasChanged;
+	}
+}
