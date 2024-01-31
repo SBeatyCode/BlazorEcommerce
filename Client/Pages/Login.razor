@@ -1,0 +1,45 @@
+﻿@page "/login"
+@using BlazorEcommerce.Client.Services.AuthService;
+@inject IAuthService AuthService
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager navigationManager
+
+<PageTitle>LogIn</PageTitle>
+<h2>LogIn</h2>
+
+<EditForm Model="userLogin" OnValidSubmit="LoginUser">
+	<DataAnnotationsValidator />
+	<div class="mb-3">
+		<label for="name">User Name</label>
+		<InputText id="name" @bind-Value="userLogin.UserName" class="form-control" />
+		<ValidationMessage For="@(() => userLogin.UserName)" />
+		<label for="password">Password</label>
+		<InputText id="password" @bind-Value="userLogin.Password" class="form-control" type="password" />
+		<ValidationMessage For="@(() => userLogin.Password)" />
+	</div>
+	<button class="btn btn-primary" type="submit">LogIn</button>
+</EditForm>
+<div class="alert-danger">
+	<span>@message</span>
+</div>
+
+@code {
+	private UserLogin userLogin = new UserLogin();
+	private string message = string.Empty;
+
+	private async Task LoginUser()
+	{
+		var response = await AuthService.LoginUser(userLogin);
+
+		if(!response.Success)
+		{
+			message = response.Message;
+		}
+		else
+		{
+			message = string.Empty;
+			await LocalStorage.SetItemAsync("authToken", response.Data);
+			navigationManager.NavigateTo("");
+		}
+	}
+}
