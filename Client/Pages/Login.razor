@@ -1,8 +1,10 @@
 ﻿@page "/login"
 @using BlazorEcommerce.Client.Services.AuthService;
+@using Microsoft.AspNetCore.WebUtilities;
 @inject IAuthService AuthService
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager navigationManager
+@inject AuthenticationStateProvider authenticationStateProvider
 
 <PageTitle>LogIn</PageTitle>
 <h2>LogIn</h2>
@@ -26,6 +28,17 @@
 @code {
 	private UserLogin userLogin = new UserLogin();
 	private string message = string.Empty;
+	private string returnUrl = string.Empty;
+
+	protected override void OnInitialized()
+	{
+		var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+
+		if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var url))
+		{
+			returnUrl = url;
+		}
+	}
 
 	private async Task LoginUser()
 	{
@@ -39,7 +52,8 @@
 		{
 			message = string.Empty;
 			await LocalStorage.SetItemAsync("authToken", response.Data);
-			navigationManager.NavigateTo("");
+			await authenticationStateProvider.GetAuthenticationStateAsync();
+			navigationManager.NavigateTo(returnUrl);
 		}
 	}
 }
