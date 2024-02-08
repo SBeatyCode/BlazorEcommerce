@@ -1,8 +1,10 @@
 ﻿@page "/login"
 @using BlazorEcommerce.Client.Services.AuthService;
+@using BlazorEcommerce.Client.Services.CartService;
 @using Microsoft.AspNetCore.WebUtilities;
 @inject IAuthService AuthService
 @inject ILocalStorageService LocalStorage
+@inject ICartService CartService
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider authenticationStateProvider
 
@@ -53,6 +55,8 @@
 			message = string.Empty;
 			await LocalStorage.SetItemAsync("authToken", response.Data);
 			await authenticationStateProvider.GetAuthenticationStateAsync();
+			await CartService.StoreCartItems(true);
+			await CartService.UpdateCartItemCount();
 			navigationManager.NavigateTo(returnUrl);
 		}
 	}

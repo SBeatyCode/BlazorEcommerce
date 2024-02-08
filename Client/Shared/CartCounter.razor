@@ -13,10 +13,7 @@
 @code {
 	private int GetCartItemsCount()
 	{
-		var cart = LocalStorage.GetItem<List<CartItem>>("cart");
-
-		//return cart != null ? cart.Count : 0;
-		return cart != null ? cart.Sum(i => i.Quantity) : 0;
+		return LocalStorage.GetItem<int>("cartCount");
 	}
 
 	protected override void OnInitialized()

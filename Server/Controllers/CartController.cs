@@ -3,6 +3,8 @@ using BlazorEcommerce.Shared.DTOs;
 using BlazorEcommerce.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BlazorEcommerce.Server.Controllers
 {
@@ -27,5 +29,50 @@ namespace BlazorEcommerce.Server.Controllers
 			else
 				return Ok(response);
 		}
-	}
+
+		[HttpPost("/store-cart"), Authorize]
+		public async Task<ActionResult<ServiceResponse<List<CartItemProductResponse>>>> StoreCartItems(List<CartItem> cartItems)
+		{
+			var response = await _cartService.StoreCartItems(cartItems);
+
+			if (response == null)
+				return BadRequest(response);
+			else
+				return Ok(response);
+		}
+
+		[HttpGet("/count")]
+		public async Task<ActionResult<ServiceResponse<int>>> GetCartCount()
+		{
+			var response = await _cartService.GetCartCount();
+
+			if (response == null)
+				return BadRequest(response);
+			else
+				return Ok(response);
+		}
+
+		[HttpGet("/get-cart-db")]
+		public async Task<ActionResult<ServiceResponse<List<CartItemProductResponse>>>> GetCartProductsFromDatabase()
+		{
+			var response = await _cartService.GetCartProductsFromDatabase();
+
+			if (response == null)
+				return BadRequest(response);
+			else
+				return Ok(response);
+		}
+
+		[HttpPost("/add")]
+        public async Task<ActionResult<ServiceResponse<bool>>> AddToCart(CartItem cartItem)
+		{
+			var response = await _cartService.AddToCart(cartItem);
+
+            if (response == null)
+                return BadRequest(response);
+            else
+                return Ok(response);
+        }
+
+    }
 }

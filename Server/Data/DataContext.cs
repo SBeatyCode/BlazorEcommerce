@@ -11,6 +11,9 @@ namespace BlazorEcommerce.Server.Data
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
+			modelBuilder.Entity<CartItem>()
+				.HasKey(ci => new { ci.UserId, ci.ProductId, ci.ProductTypeId});
+
 			//Building the composite key
 			modelBuilder.Entity<ProductVarient>()
 				.HasKey(p => new {p.ProductId, p.ProductTypeId});
@@ -335,5 +338,7 @@ namespace BlazorEcommerce.Server.Data
 		public DbSet<ProductVarient> ProductVarients { get; set; }
 		public DbSet<ProductType> ProductTypes { get; set; }
 		public DbSet<User> Users { get; set; }
+
+		public DbSet<CartItem> CartItems { get; set; }
 	}
 }

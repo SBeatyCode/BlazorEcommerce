@@ -1,4 +1,6 @@
-﻿@inject ILocalStorageService LocalStorage
+﻿@using BlazorEcommerce.Client.Services.CartService;
+@inject ILocalStorageService LocalStorage
+@inject ICartService CartService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
@@ -42,6 +44,8 @@
 
 	private async Task LogOut()
 	{
+		await CartService.StoreCartItems(false);
+		await CartService.UpdateCartItemCount();
 		await LocalStorage.RemoveItemAsync("authToken");
 		await AuthenticationStateProvider.GetAuthenticationStateAsync();
 		NavigationManager.NavigateTo("");
