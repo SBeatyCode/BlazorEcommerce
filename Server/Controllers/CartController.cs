@@ -74,5 +74,27 @@ namespace BlazorEcommerce.Server.Controllers
                 return Ok(response);
         }
 
+		[HttpPut("/update-quantity")]
+        public async Task<ActionResult<ServiceResponse<bool>>> UpdateItemQuantity(CartItem cartItem)
+		{
+			var response = await _cartService.UpdateItemQuantity(cartItem);
+
+            if (response == null)
+                return BadRequest(response);
+            else
+                return Ok(response);
+        }
+
+		[HttpDelete("/delete-item/{cartItem}")]
+        public async Task<ActionResult<ServiceResponse<bool>>> DeleteItem(CartItem cartItem)
+		{
+			var response = _cartService.DeleteItem(cartItem);
+
+            if (response == null)
+                return BadRequest(response);
+            else
+                return Ok(response);
+        }
+
     }
 }

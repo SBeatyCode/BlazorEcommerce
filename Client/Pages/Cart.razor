@@ -28,7 +28,7 @@ else
                 <div class="cart-product-price">
                     $@(product.ProductPrice * product.ProductQuantity)
                 </div>
-                <button class="btn-delete" onclick="@RemoveFromCart(product.ProductId, @product.ProductTypeId)">
+                <button class="btn-delete" onclick="@RemoveFromCart(product)">
                     Delete
                 </button>
             </div>
@@ -48,9 +48,9 @@ else
         await LoadCart();
     }
 
-    private async Task RemoveFromCart(int productId, int productTypeId)
+    private async Task RemoveFromCart(CartItemProductResponse cartItemProduct)
     {
-        await CartService.RemoveFromCart(productId, productTypeId);
+        await CartService.RemoveFromCart(cartItemProduct);
         message = "Loading Cart";
         await LoadCart();
     }

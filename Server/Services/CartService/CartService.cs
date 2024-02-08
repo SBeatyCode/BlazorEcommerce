@@ -161,24 +161,21 @@ namespace BlazorEcommerce.Server.Services.CartService
 			cartItem.UserId = (int)GetUserID();
 
 			if(cartItem.UserId > 0)
-			{
-				var existingItem = await _dataContext.CartItems
-					.FirstOrDefaultAsync(ci => ci.ProductId == cartItem.ProductId 
-					&& ci.ProductTypeId == cartItem.ProductTypeId 
-					&& ci.UserId == cartItem.UserId);
+            {
+                var existingItem = await GetExistingCartItem(cartItem);
 
-				if(existingItem != null) 
-					existingItem.Quantity+= cartItem.Quantity;
-				else
-					_dataContext.CartItems.Add(cartItem);
+                if (existingItem != null)
+                    existingItem.Quantity += cartItem.Quantity;
+                else
+                    _dataContext.CartItems.Add(cartItem);
 
-				await _dataContext.SaveChangesAsync();
+                await _dataContext.SaveChangesAsync();
 
-				response.Data = true;
-				response.Success = true;
-				response.Message = "Cart Item added";
-			}
-			else //if something went wrong getting the UserID
+                response.Data = true;
+                response.Success = true;
+                response.Message = "Cart Item added";
+            }
+            else //if something went wrong getting the UserID
 			{
                 response.Data = false;
                 response.Success = false;
@@ -186,6 +183,68 @@ namespace BlazorEcommerce.Server.Services.CartService
             }
 			return response;
 		}
+
+
+        public async Task<ServiceResponse<bool>> UpdateItemQuantity(CartItem cartItem)
+		{
+			var response = new ServiceResponse<bool>();
+			var existingItem = await GetExistingCartItem(cartItem);
+
+			if(existingItem != null)
+			{
+				existingItem.Quantity = cartItem.Quantity;
+				await _dataContext.SaveChangesAsync();
+
+				response.Data = true;
+				response.Success = true;
+				response.Message = "Updated Item Quantity";
+			}
+			else
+			{
+				response.Data= false;
+				response.Success = false;
+				response.Message = $"The item {cartItem} is not in the DataBase for user #{GetUserID()}";
+			}
+			return response;
+		}
+
+		public async Task<ServiceResponse<bool>> DeleteItem(CartItem cartItem)
+		{
+			var response = new ServiceResponse<bool>();
+			CartItem? existingItem = await GetExistingCartItem(cartItem);
+
+			if(existingItem != null) 
+			{
+				_dataContext.Remove(existingItem);
+				await _dataContext.SaveChangesAsync();
+
+				response.Data = true;
+				response.Success = true;
+				response.Message = "Item was removed";
+			}
+			else
+			{
+				response.Data = false;
+				response.Success = false;
+				response.Message = "Could not remove Item";
+			}
+			return response;
+        }
+
+        /// <summary>
+        /// Checks to see if a particular CartItem exists already for the current User
+        /// in their Cart on the DataBase. If so returns it, otherwise returns NULL
+        /// </summary>
+        private async Task<CartItem?> GetExistingCartItem(CartItem cartItem)
+        {
+			if (cartItem.UserId <= 0)
+				cartItem.UserId = (int)GetUserID();
+
+            return await _dataContext.CartItems
+                                .FirstOrDefaultAsync(ci => ci.ProductId == cartItem.ProductId
+                                && ci.ProductTypeId == cartItem.ProductTypeId
+                                && ci.UserId == cartItem.UserId);
+        }
 
         /// <summary>
         /// Gets the ID of the Authorized User on the Client

@@ -3,6 +3,7 @@ using BlazorEcommerce.Shared.DTOs;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
+using System.Security.Claims;
 
 namespace BlazorEcommerce.Client.Services.CartService
 {
@@ -60,40 +61,79 @@ namespace BlazorEcommerce.Client.Services.CartService
 
 		/// <summary>
 		/// Removes an Item from the Cart searching by productID and productTypeId, 
-		/// and saves the result to Local storage.
+		/// and saves the result to the Database or Local storage.
 		/// </summary>
-        public async Task RemoveFromCart(int productID, int productTypeId)
+        public async Task RemoveFromCart(CartItemProductResponse cartItemProduct)
 		{
-			List<CartItem> cart = await GetCartFromLocalStorage();
+            if (await IsUserAuthenticated())
+            {
+                CartItem cartItem = new CartItem
+                {
+                    UserId = int.Parse(_authenticationStateProvider
+                        .GetAuthenticationStateAsync().Result.User
+                        .FindFirst(ClaimTypes.NameIdentifier).Value),
+                    ProductId = cartItemProduct.ProductId,
+                    ProductTypeId = cartItemProduct.ProductTypeId,
+                    Quantity = cartItemProduct.ProductQuantity
+                };
 
-			if(cart != null && cart.Count != 0)
+                await _httpClient.DeleteAsync($"api/cart/delete-item/{cartItem}");
+            }
+			else
 			{
-				var cartItem = cart.Find(i => i.ProductId == productID && i.ProductTypeId == productTypeId);
-				if (cartItem != null)
-				{
-					cart.Remove(cartItem);
-					await _localStorageService.SetItemAsync("cart", cart);
-					await UpdateCartItemCount();
-				}
-			}
-		}
+                List<CartItem> cart = await GetCartFromLocalStorage();
 
+                if (cart != null && cart.Count != 0)
+                {
+                    var cartItem = cart.Find(i => i.ProductId == cartItemProduct.ProductId
+						&& i.ProductTypeId == cartItemProduct.ProductTypeId);
+                    if (cartItem != null)
+                    {
+                        cart.Remove(cartItem);
+                        await _localStorageService.SetItemAsync("cart", cart);
+                        await UpdateCartItemCount();
+                    }
+                }
+            }
+            await UpdateCartItemCount();
+        }
+
+		/// <summary>
+		/// Updates the Quantity of an Item in the Cart (Database or Local) with the
+		/// quantity of the passed CartItemProduct
+		/// </summary>
         public async Task UpdateItemQuantity(CartItemProductResponse cartItemProduct)
 		{
-            List<CartItem> cart = await GetCartFromLocalStorage();
-
-            if (cart != null && cart.Count != 0)
+			if(await IsUserAuthenticated())
 			{
-				var updateProduct = cart.Find(i => i.ProductId == cartItemProduct.ProductId
-					&& i.ProductTypeId == cartItemProduct.ProductTypeId);
-
-				if(updateProduct != null) 
+				CartItem cartItem = new CartItem
 				{
-					updateProduct.Quantity = cartItemProduct.ProductQuantity;
-					await _localStorageService.SetItemAsync("cart", cart);
-					OnCartChange.Invoke();
-				}
+					UserId = int.Parse(_authenticationStateProvider
+						.GetAuthenticationStateAsync().Result.User
+						.FindFirst(ClaimTypes.NameIdentifier).Value),
+					ProductId = cartItemProduct.ProductId,
+					ProductTypeId = cartItemProduct.ProductTypeId,
+					Quantity = cartItemProduct.ProductQuantity
+				};
+				await _httpClient.PutAsJsonAsync("api/cart/update-quantity", cartItem);
 			}
+			else
+			{
+                List<CartItem> cart = await GetCartFromLocalStorage();
+
+                if (cart != null && cart.Count != 0)
+                {
+                    var updateProduct = cart.Find(i => i.ProductId == cartItemProduct.ProductId
+                        && i.ProductTypeId == cartItemProduct.ProductTypeId);
+
+                    if (updateProduct != null)
+                    {
+                        updateProduct.Quantity = cartItemProduct.ProductQuantity;
+                        await _localStorageService.SetItemAsync("cart", cart);
+                        OnCartChange.Invoke();
+                    }
+                }
+            }
         }
 
 		/// <summary>

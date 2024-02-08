@@ -7,7 +7,7 @@ namespace BlazorEcommerce.Client.Services.CartService
 	{
 		event Action OnCartChange;
 		Task AddToCart(CartItem cartItem);
-		Task RemoveFromCart(int productID, int productTypeId);
+		Task RemoveFromCart(CartItemProductResponse cartItemProduct);
 		Task UpdateItemQuantity(CartItemProductResponse cartItemProduct);
 		Task<List<CartItemProductResponse>> GetCartProducts();
 		Task StoreCartItems(bool emptyLocalCart);
