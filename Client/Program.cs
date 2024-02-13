@@ -2,6 +2,7 @@ using BlazorEcommerce.Client;
 using BlazorEcommerce.Client.Services.AuthService;
 using BlazorEcommerce.Client.Services.CartService;
 using BlazorEcommerce.Client.Services.CategoryService;
+using BlazorEcommerce.Client.Services.OrderService;
 using BlazorEcommerce.Client.Services.ProductServices;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -18,6 +19,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();

@@ -96,5 +96,16 @@ namespace BlazorEcommerce.Server.Controllers
                 return Ok(response);
         }
 
+		[HttpDelete("/empty-cart")]
+		public async Task<ActionResult<ServiceResponse<bool>>> EmptyCart()
+		{
+			var response = _cartService.EmptyCart();
+
+            if (response == null)
+                return BadRequest(response);
+            else
+                return Ok(response);
+        }
+
     }
 }

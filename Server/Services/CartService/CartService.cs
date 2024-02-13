@@ -5,18 +5,19 @@ using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 using System.Security.Claims;
 using System.Linq;
+using BlazorEcommerce.Server.Services.AuthService;
 
 namespace BlazorEcommerce.Server.Services.CartService
 {
 	public class CartService : ICartService
 	{
 		private readonly DataContext _dataContext;
-		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly IAuthService _authService;
 
-		public CartService(DataContext dataContext, IHttpContextAccessor httpContextAccessor) 
+		public CartService(DataContext dataContext, IAuthService authService) 
 		{
 			_dataContext = dataContext;
-			_httpContextAccessor = httpContextAccessor;
+			_authService = authService;
 		}
 
 		/// <summary>
@@ -80,9 +81,9 @@ namespace BlazorEcommerce.Server.Services.CartService
 		public async Task<ServiceResponse<List<CartItemProductResponse>>> StoreCartItems(List<CartItem> cartItems)
 		{
 			var response = new ServiceResponse<List<CartItemProductResponse>>();
-			int? userId = GetUserID();
+			int userId = _authService.GetUserId();
 
-			if (cartItems != null && cartItems.Count > 0 && userId > 0 && userId != null)
+			if (cartItems != null && cartItems.Count > 0 && userId > 0)
 			{
 				//put in a try - catch in case UserId is bad
 				try
@@ -113,9 +114,9 @@ namespace BlazorEcommerce.Server.Services.CartService
 		public async Task<ServiceResponse<int>> GetCartCount()
 		{
 			var response = new ServiceResponse<int>();
-			int? userId = GetUserID();
+			int userId = _authService.GetUserId();
 
-			if(userId > 0 && userId != null)
+			if(userId > 0)
 			{
 				int count = await _dataContext.CartItems
 					.Where(ci => ci.UserId == userId)
@@ -139,7 +140,7 @@ namespace BlazorEcommerce.Server.Services.CartService
 		/// </summary>
 		public async Task<ServiceResponse<List<CartItemProductResponse>>> GetCartProductsFromDatabase()
 		{
-			var cart = await _dataContext.CartItems.Where(ci => ci.UserId == GetUserID()).ToListAsync();
+			var cart = await _dataContext.CartItems.Where(ci => ci.UserId == _authService.GetUserId()).ToListAsync();
 			var response = await GetCartItemProducts(cart);
 
 			if(response != null && response.Data != null)
@@ -158,7 +159,7 @@ namespace BlazorEcommerce.Server.Services.CartService
 		public async Task<ServiceResponse<bool>> AddToCart(CartItem cartItem)
 		{
 			var response = new ServiceResponse<bool>();
-			cartItem.UserId = (int)GetUserID();
+			cartItem.UserId = _authService.GetUserId();
 
 			if(cartItem.UserId > 0)
             {
@@ -203,7 +204,7 @@ namespace BlazorEcommerce.Server.Services.CartService
 			{
 				response.Data= false;
 				response.Success = false;
-				response.Message = $"The item {cartItem} is not in the DataBase for user #{GetUserID()}";
+				response.Message = $"The item {cartItem} is not in the DataBase for user #{_authService.GetUserId()}";
 			}
 			return response;
 		}
@@ -231,6 +232,38 @@ namespace BlazorEcommerce.Server.Services.CartService
 			return response;
         }
 
+		/// <summary>
+		/// Empties all of the current user's items from the Database
+		/// </summary>
+		public async Task<ServiceResponse<bool>> EmptyCart()
+		{
+            var response = new ServiceResponse<bool>();
+			int userId = _authService.GetUserId();
+
+
+            if (userId > 0)
+			{
+                _dataContext.CartItems.RemoveRange(_dataContext.CartItems
+					.Where(ci => ci.UserId == userId));
+
+                await _dataContext.SaveChangesAsync();
+
+                return new ServiceResponse<bool>
+                {
+                    Data = true,
+                    Success = false,
+                    Message = "All Items Deleted"
+                };
+            }
+			else
+				return new ServiceResponse<bool> 
+				{
+					Data = false,
+					Success = false,
+					Message= "Could not get the UserID to Clear the Cart"
+				};
+        }
+
         /// <summary>
         /// Checks to see if a particular CartItem exists already for the current User
         /// in their Cart on the DataBase. If so returns it, otherwise returns NULL
@@ -238,16 +271,12 @@ namespace BlazorEcommerce.Server.Services.CartService
         private async Task<CartItem?> GetExistingCartItem(CartItem cartItem)
         {
 			if (cartItem.UserId <= 0)
-				cartItem.UserId = (int)GetUserID();
+				cartItem.UserId = _authService.GetUserId();
 
             return await _dataContext.CartItems
                                 .FirstOrDefaultAsync(ci => ci.ProductId == cartItem.ProductId
                                 && ci.ProductTypeId == cartItem.ProductTypeId
                                 && ci.UserId == cartItem.UserId);
         }
-
-        /// <summary>
-        /// Gets the ID of the Authorized User on the Client
-        private int? GetUserID() => int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
 	}
 }
