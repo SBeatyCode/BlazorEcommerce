@@ -156,6 +156,34 @@ namespace BlazorEcommerce.Server.Services.CartService
 			return response;
 		}
 
+		public async Task<ServiceResponse<List<CartItemProductResponse>>> GetCartProductsFromDatabase(int userId)
+		{
+			if (await _authService.UserExists(userId))
+			{
+				var cart = await _dataContext.CartItems.Where(ci => ci.UserId.Equals(userId)).ToListAsync();
+				var response = await GetCartItemProducts(cart);
+
+				if (response != null && response.Data != null)
+				{
+					response.Success = true;
+					response.Message = "Operation was sucessful";
+				}
+				else
+				{
+					response.Success = false;
+					response.Message = "Could not get CartItems from the Database";
+				}
+				return response;
+			}
+			else
+				return new ServiceResponse<List<CartItemProductResponse>>
+				{
+					Data = null,
+					Success = false,
+					Message = "User could not be found"
+				};
+		}
+
 		public async Task<ServiceResponse<bool>> AddToCart(CartItem cartItem)
 		{
 			var response = new ServiceResponse<bool>();
@@ -264,11 +292,39 @@ namespace BlazorEcommerce.Server.Services.CartService
 				};
         }
 
-        /// <summary>
-        /// Checks to see if a particular CartItem exists already for the current User
-        /// in their Cart on the DataBase. If so returns it, otherwise returns NULL
-        /// </summary>
-        private async Task<CartItem?> GetExistingCartItem(CartItem cartItem)
+		public async Task<ServiceResponse<bool>> EmptyCart(int userId)
+		{
+			var response = new ServiceResponse<bool>();
+
+
+			if (userId > 0 && await _authService.UserExists(userId))
+			{
+				_dataContext.CartItems.RemoveRange(_dataContext.CartItems
+					.Where(ci => ci.UserId == userId));
+
+				await _dataContext.SaveChangesAsync();
+
+				return new ServiceResponse<bool>
+				{
+					Data = true,
+					Success = false,
+					Message = "All Items Deleted"
+				};
+			}
+			else
+				return new ServiceResponse<bool>
+				{
+					Data = false,
+					Success = false,
+					Message = "Could not get the UserID to Clear the Cart"
+				};
+		}
+
+		/// <summary>
+		/// Checks to see if a particular CartItem exists already for the current User
+		/// in their Cart on the DataBase. If so returns it, otherwise returns NULL
+		/// </summary>
+		private async Task<CartItem?> GetExistingCartItem(CartItem cartItem)
         {
 			if (cartItem.UserId <= 0)
 				cartItem.UserId = _authService.GetUserId();

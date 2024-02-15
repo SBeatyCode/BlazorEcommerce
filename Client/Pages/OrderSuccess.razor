@@ -1,0 +1,14 @@
+﻿@page "/order-success"
+@using BlazorEcommerce.Client.Services.CartService;
+@inject ICartService CartService
+
+<h3>Thank You!</h3>
+
+<span>Thank you for placing your order! You can check your order <a href="orders">here</a>!</span>
+
+@code {
+	protected override async Task OnInitializedAsync()
+	{
+		await CartService.UpdateCartItemCount();
+	}
+}

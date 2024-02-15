@@ -21,10 +21,13 @@ namespace BlazorEcommerce.Server.Services.OrderService
             _authService = authService;
         }
 
-        public async Task<ServiceResponse<bool>> PlaceOrder()
+        /// <summary>
+        /// Adds an Order to the Database
+        /// </summary>
+        public async Task<ServiceResponse<bool>> PlaceOrder(int userId)
         {
             var response = new ServiceResponse<bool>();
-            var products = (await _cartService.GetCartProductsFromDatabase()).Data;
+            var products = (await _cartService.GetCartProductsFromDatabase(userId)).Data;
 
             if(products != null && products.Count > 0) 
             {
@@ -42,14 +45,14 @@ namespace BlazorEcommerce.Server.Services.OrderService
 
                 Order order = new Order
                 {
-                    UserId = _authService.GetUserId(),
+                    UserId = userId,
                     OrderDate = DateTime.Now,
                     TotalPrice = totalprice,
                     OrderItems = orderItems
                 };
 
                 _dataContext.Orders.Add(order);
-                await _cartService.EmptyCart();
+                await _cartService.EmptyCart(userId);
                 await _dataContext.SaveChangesAsync();
 
                 response.Data = true;

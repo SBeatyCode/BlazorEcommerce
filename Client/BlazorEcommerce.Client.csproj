@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Content Remove="Pages\Cart.razor" />
+    <Content Remove="Pages\OrderSuccess.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,10 +29,16 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Pages\Cart.razor" />
+    <_ContentIncludedByDefault Remove="Pages\OrderSuccess.razor" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Pages\Cart.razor" />
+    <None Include="Pages\OrderSuccess.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Pages\OrderSuccess.razor" />
   </ItemGroup>
 
 </Project>

@@ -20,15 +20,16 @@ namespace BlazorEcommerce.Client.Services.OrderService
             _navigationManager = navigationManager;
         }
 
-        public async Task PlaceOrder()
+        public async Task<string> PlaceOrder()
         {
             if(await IsUserAuthenticated())
             {
-                await _httpClient.PostAsync("api/order/place-order", null);
+                var result = await _httpClient.PostAsync("api/payment/checkout", null);
+                return await result.Content.ReadAsStringAsync();
             }
             else
             {
-                _navigationManager.NavigateTo("login");
+                return "login";
             }
         }
 

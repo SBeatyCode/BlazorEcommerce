@@ -17,17 +17,6 @@ namespace BlazorEcommerce.Server.Controllers
             _orderService = orderService;
         }
 
-        [HttpPost("/place-order")]
-        public async Task<ActionResult<ServiceResponse<bool>>> PlaceOrder()
-        {
-            var response = await _orderService.PlaceOrder();
-
-            if (response == null || response.Success == false)
-                return BadRequest(response);
-            else
-                return Ok(response);
-        }
-
         [HttpGet("/get-orders")]
         public async Task<ActionResult<ServiceResponse<List<OrderResponse>>>> GetOrders()
         {

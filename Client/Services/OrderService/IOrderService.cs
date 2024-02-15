@@ -5,7 +5,7 @@ namespace BlazorEcommerce.Client.Services.OrderService
 {
     public interface IOrderService
     {
-        Task PlaceOrder();
+        Task<string> PlaceOrder();
         Task<List<OrderResponse>> GetOrders();
         Task<OrderDetailsResponse> GetOrderDetails(int orderId);
     }

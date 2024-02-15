@@ -5,17 +5,13 @@
 @using BlazorEcommerce.Shared.DTOs;
 @inject ICartService CartService
 @inject IOrderService OrderService
+@inject NavigationManager NavigationManager
 
 <h2>Shopping Cart</h2>
 
 @if(cartProducts == null || cartProducts.Count == 0)
 {
     <span>@message</span>
-}
-else if(orderPlaced)
-{
-    <h4>Thank You! Your Order has been placed!</h4>
-    <span>Check your order status <a href="orders">here</a></span>
 }
 else
 {
@@ -44,19 +40,17 @@ else
             Total (@cartProducts.Count Items): $@cartProducts.Sum(product => product.ProductPrice * product.ProductPrice)
         </div>
     </div>
-    <button class="btn alert-success float-end mt-1" onclick="@PlaceOrder()">Place Order</button>
+    <button class="btn alert-success float-end mt-1" onclick="@PlaceOrder()">Checkout</button>
     <button class="btn alert-danger float-end mt-1" onclick="@ClearCart()">Clear Cart</button>
 }
 
 @code {
     List<CartItemProductResponse>? cartProducts = null;
     string message = "Loading Cart";
-    bool orderPlaced = false;
 
     protected override async Task OnInitializedAsync()
     {
         message = "Loading Cart";
-        orderPlaced = false;
         await LoadCart();
     }
 
@@ -93,9 +87,8 @@ else
 
     private async Task PlaceOrder()
     {
-        await OrderService.PlaceOrder();
-        await CartService.UpdateCartItemCount();
-        orderPlaced = true;
+        string url = await OrderService.PlaceOrder();
+        NavigationManager.NavigateTo(url);
     }
 
     private async Task ClearCart()

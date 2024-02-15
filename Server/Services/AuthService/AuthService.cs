@@ -35,6 +35,19 @@ namespace BlazorEcommerce.Server.Services.AuthService
 			else return -1;
 		}
 
+		/// <summary>
+		/// Gets the email of the authenticated user. If this fails, an empty string is returned
+		/// </summary>
+		/// <returns></returns>
+		public string GetUserEmail()
+		{
+            string email = _contextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Email);
+
+            if (!string.IsNullOrEmpty(email))
+                return email;
+            else return "";
+        }
+
 
         public async Task<ServiceResponse<int>> RegisterUser(User user, string password)
 		{
@@ -74,6 +87,15 @@ namespace BlazorEcommerce.Server.Services.AuthService
 			if (await _dataContext.Users.AnyAsync(user => user.Email.ToLower().Equals(email.ToLower())))
 				return true;
 			else 
+				return false;
+		}
+
+		public async Task<bool> UserExists(int userId)
+		{
+			//if email exists in Database already
+			if (await _dataContext.Users.AnyAsync(user => user.Id.Equals(userId)))
+				return true;
+			else
 				return false;
 		}
 
@@ -128,6 +150,13 @@ namespace BlazorEcommerce.Server.Services.AuthService
 			}
 
 			return response;
+		}
+
+		public async Task<User> GetUserByEmail(string userEmail)
+		{
+			var result = await _dataContext.Users.FirstOrDefaultAsync(user => user.Email.Equals(userEmail));
+
+			return result != null ? result : new User();
 		}
 
 		private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
