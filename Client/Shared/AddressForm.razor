@@ -1,0 +1,14 @@
+﻿@using BlazorEcommerce.Client.Services.AddressService;
+@inject IAddressService AddressService
+
+<h3>AddressForm</h3>
+
+@code {
+	Address address = new Address();
+	bool editingAddress = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		//
+	}
+}

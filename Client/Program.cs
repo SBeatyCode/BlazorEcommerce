@@ -1,4 +1,5 @@
 using BlazorEcommerce.Client;
+using BlazorEcommerce.Client.Services.AddressService;
 using BlazorEcommerce.Client.Services.AuthService;
 using BlazorEcommerce.Client.Services.CartService;
 using BlazorEcommerce.Client.Services.CategoryService;
@@ -20,6 +21,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
