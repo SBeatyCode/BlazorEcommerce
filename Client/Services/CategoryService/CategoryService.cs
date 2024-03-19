@@ -5,7 +5,7 @@ namespace BlazorEcommerce.Client.Services.CategoryService
 {
 	public class CategoryService : ICategoryService
 	{
-		event Action OnChange;
+		public event Action OnChange;
 		public List<Category> Categories { get; set; } = new List<Category>();
 		public List<Category> AdminCategories { get; set; } = new List<Category>();
 
