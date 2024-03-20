@@ -11,9 +11,9 @@ namespace BlazorEcommerce.Client.Services.CategoryService
 
 		Task GetCategories();
 		Task GetAdminCategories();
-		Task AddCategories(Category category);
-		Task UpdateCategories(Category category);
-		Task DeleteCategories(int categoryId);
+		Task AddCategory(Category category);
+		Task UpdateCategory(Category category);
+		Task DeleteCategory(int categoryId);
 		Category CreateNewCategory();
 	}
 }

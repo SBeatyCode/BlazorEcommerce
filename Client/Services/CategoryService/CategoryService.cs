@@ -36,21 +36,21 @@ namespace BlazorEcommerce.Client.Services.CategoryService
 			}
 		}
 
-		public async Task AddCategories(Category category)
+		public async Task AddCategory(Category category)
 		{
 			var response = await _httpClient.PostAsJsonAsync("api/category/add", category);
 
 			await CategoriesChanged();
 		}
 
-		public async Task UpdateCategories(Category category)
+		public async Task UpdateCategory(Category category)
 		{
 			var response = await _httpClient.PutAsJsonAsync("api/category/update", category);
 
 			await CategoriesChanged();
 		}
 
-		public async Task DeleteCategories(int categoryId)
+		public async Task DeleteCategory(int categoryId)
 		{
 			var response = await _httpClient.DeleteAsync($"api/category/delete/{categoryId}");
 
@@ -59,7 +59,7 @@ namespace BlazorEcommerce.Client.Services.CategoryService
 
 		public Category CreateNewCategory()
 		{
-			var newCategory = new Category
+			Category newCategory = new Category
 			{
 				IsNew = true,
 				Editing = true
