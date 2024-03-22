@@ -1,0 +1,70 @@
+﻿@page "/admin/products"
+@using BlazorEcommerce.Client.Services.ProductServices;
+@using BlazorEcommerce.Shared;
+@using Microsoft.AspNetCore.Authorization;
+@inject IProductService ProductService
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Admim")]
+
+<h3>Products</h3>
+
+@if (ProductService.AdminProducts == null || ProductService.AdminProducts.Count == 0)
+{
+	<span>No Products to Display</span>
+}
+else
+{
+	<button class="btn btn-primary float-end" @onclick="(CreateProduct)">
+		<i class="oi oi-plus"></i> Create New Product
+	</button>
+	<table class="table">
+		<thead>
+			<tr>
+				<th></th>
+				<th>Product</th>
+				<th>Varient</th>
+				<th>Price</th>
+				<th>Visible</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (Product product in ProductService.AdminProducts)
+			{
+				@foreach (ProductVarient productVarient in product.Varients)
+				{
+					<tr>
+						<td><img src="@product.ImageUrl" /></td>
+						<td>@product.Name</td>
+						<td>@productVarient.ProductType!.Name</td>
+						<td>@productVarient.Price</td>
+						<td>@(productVarient.Visible ? "✔️" : "❌")</td>
+						<td>
+							<button class="btn btn-primary" @onclick="(() => EditProduct(product.Id))">
+								<i class="oi oi-pencil"></i> Edit
+							</button>
+						</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+}
+
+@code {
+
+	protected override async Task OnInitializedAsync()
+	{
+		await ProductService.GetAdminProductsAsync();
+	}
+
+	public void EditProduct(int productId)
+	{
+		NavigationManager.NavigateTo($"admin/product/{productId}");
+	}
+
+	public void CreateProduct()
+	{
+		NavigationManager.NavigateTo($"admin/product");
+	}
+}

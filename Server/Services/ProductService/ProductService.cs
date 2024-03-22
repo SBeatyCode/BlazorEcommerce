@@ -8,19 +8,33 @@ namespace BlazorEcommerce.Server.Services.ProductService
 	public class ProductService : IProductService
 	{
 		private readonly DataContext _context;
+		private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public ProductService(DataContext dataContext) 
+		public ProductService(DataContext dataContext, IHttpContextAccessor httpContextAccessor) 
 		{
 			_context = dataContext;
+			_httpContextAccessor = httpContextAccessor;
 		}
 
 		public async Task<ServiceResponse<Product>> GetProductByIdAsync(int productId)
 		{
 			var response = new ServiceResponse<Product>();
-			var product = await _context.Products
-				.Include(p => p.Varients)
+			Product? product = null;
+
+			if(_httpContextAccessor.HttpContext != null && _httpContextAccessor.HttpContext.User.IsInRole("Admin"))
+			{
+				product = await _context.Products
+				.Include(p => p.Varients.Where(v => !v.Deleted))
 				.ThenInclude(v => v.ProductType)
-				.FirstOrDefaultAsync(p => p.Id == productId);
+				.FirstOrDefaultAsync(p => p.Id == productId && !p.Deleted);
+			}
+			else
+			{
+				product = await _context.Products
+				.Include(p => p.Varients.Where(v => v.Visible && !v.Deleted))
+				.ThenInclude(v => v.ProductType)
+				.FirstOrDefaultAsync(p => p.Id == productId && !p.Deleted && p.Visible);
+			}
 
 			if(product == null) 
 			{
@@ -42,7 +56,10 @@ namespace BlazorEcommerce.Server.Services.ProductService
 		{
 			var response = new ServiceResponse<List<Product>>
 			{
-				Data = await _context.Products.Include(p => p.Varients).ToListAsync()
+				Data = await _context.Products
+				.Where(p => p.Visible && !p.Deleted)
+				.Include(p => p.Varients.Where(v => v.Visible && !v.Deleted))
+				.ToListAsync()
 			};
 
 			if(response.Data != null) 
@@ -64,8 +81,9 @@ namespace BlazorEcommerce.Server.Services.ProductService
 			var response = new ServiceResponse<List<Product>>
 			{
 				Data = await _context.Products
-					.Where(p => p.Category!.Url.ToLower().Equals(categoryUrl.ToLower()))
-					.Include(p => p.Varients)
+					.Where(p => p.Visible && !p.Deleted && 
+						p.Category!.Url.ToLower().Equals(categoryUrl.ToLower()))
+					.Include(p => p.Varients.Where(v => v.Visible && !v.Deleted))
 					.ToListAsync()
 			};
 
@@ -93,10 +111,10 @@ namespace BlazorEcommerce.Server.Services.ProductService
 			//Return list of products based on the current page number, and only get
 			//enough products that will fill a page
 			var products = await _context.Products
-						.Where(p => p.Name.ToLower().Contains(searchText.ToLower())
-						||
-						p.Description.ToLower().Contains(searchText.ToLower()))
-						.Include(p => p.Varients)
+						.Where(p => p.Visible && !p.Deleted &&
+							p.Name.ToLower().Contains(searchText.ToLower()) ||
+							p.Description.ToLower().Contains(searchText.ToLower()))
+						.Include(p => p.Varients.Where(v => v.Visible && !v.Deleted))
 						.Skip((page - 1) * (int)productsPerPage)
 						.Take((int)productsPerPage)
 						.ToListAsync();
@@ -178,8 +196,8 @@ namespace BlazorEcommerce.Server.Services.ProductService
 			var response = new ServiceResponse<List<Product>>();
 
 			var featured = await _context.Products
-				.Where(p => p.Featured == true)
-				.Include(p => p.Varients)
+				.Where(p => p.Featured && p.Visible && !p.Deleted)
+				.Include(p => p.Varients.Where(v => v.Visible && !v.Deleted))
 				.ToListAsync();
 
 			if(featured == null)
@@ -198,6 +216,144 @@ namespace BlazorEcommerce.Server.Services.ProductService
 			return response;
 		}
 
+		public async Task<ServiceResponse<List<Product>>> GetProductsAdmin()
+		{
+			var response = new ServiceResponse<List<Product>>
+			{
+				Data = await _context.Products
+				.Where(p => !p.Deleted)
+				.Include(p => p.Varients.Where(v => !v.Deleted))
+				.ThenInclude(v => v.ProductType)
+				.ToListAsync()
+			};
+
+			if (response.Data != null)
+			{
+				response.Success = true;
+				response.Message = "The operation was succesful!";
+			}
+			else
+			{
+				response.Success = false;
+				response.Message = "There was a problem fetching the List of Products";
+			}
+
+			return response;
+		}
+
+		public async Task<ServiceResponse<Product>> CreateProduct(Product newProduct)
+		{
+			if(newProduct != null)
+			{
+				//Products need to be set to null so EntityFramework doesn't change things
+				//that we don't want changed to the database
+				foreach (ProductVarient varient in newProduct.Varients)
+				{
+					varient.ProductType = null;
+				}
+
+				_context.Products.Add(newProduct);
+				await _context.SaveChangesAsync();
+
+				return new ServiceResponse<Product>
+				{
+					Data = newProduct,
+					Success = true,
+					Message = "Success"
+				};
+			}
+			else
+			{
+				return new ServiceResponse<Product>
+				{
+					Data = null,
+					Success = false,
+					Message = "The New Product was Null"
+				};
+			}
+		}
+
+		public async Task<ServiceResponse<Product>> UpdateProduct(Product updateProduct)
+		{
+			var product = await _context.Products.FindAsync(updateProduct.Id);
+
+			if(product != null)
+			{
+				product.Name = updateProduct.Name;
+				product.Description = updateProduct.Description;
+				product.ImageUrl = updateProduct.ImageUrl;
+				product.CategoryId = updateProduct.CategoryId;
+				product.Visible = updateProduct.Visible;
+				product.Featured = updateProduct.Featured;
+
+				foreach(ProductVarient varient in product.Varients)
+				{
+					//Check if each varient exists first, if not, then create it
+					ProductVarient? productVarient = await _context.ProductVarients
+						.SingleOrDefaultAsync(v => v.ProductId == varient.ProductId
+							&& v.ProductTypeId == varient.ProductTypeId);
+
+					if(productVarient == null)
+					{
+						varient.ProductType = null; //to prevent duplications in the DataBase of ProductType
+						_context.ProductVarients.Add(varient);
+					}
+					else //If the Varient exists, Update it
+					{
+						productVarient.ProductTypeId = varient.ProductTypeId;
+						productVarient.Price = varient.Price;
+						productVarient.OriginalPrice = varient.OriginalPrice;
+						productVarient.Visible = varient.Visible;
+						productVarient.Deleted = varient.Deleted;
+					}
+				}
+
+				await _context.SaveChangesAsync();
+
+				return new ServiceResponse<Product>
+				{
+					Data = product,
+					Success = true,
+					Message = "Updated Product"
+				};
+			}
+			else
+			{
+				return new ServiceResponse<Product>
+				{
+					Data = null,
+					Success = false,
+					Message = "Could not find Product"
+				};
+			}
+		}
+
+		public async Task<ServiceResponse<Product>> DeleteProduct(int productId)
+		{
+			var product = await _context.Products.FindAsync(productId);
+
+			if(product != null)
+			{
+				product.Deleted = true;
+
+				return new ServiceResponse<Product> 
+				{ 
+					Data = product,
+					Success = true,
+					Message = "Product deleted"
+				};
+			}
+			else
+			{
+				return new ServiceResponse<Product>
+				{
+					Data = null,
+					Success = false,
+					Message = $"Could not find Product Id of {productId}"
+				};
+			}
+		}
+
 		/// <summary>
 		/// Performs a querry to find a match from searchText in a product's name or
 		/// description, returns the result as a List<Product> of any matches
@@ -207,10 +363,10 @@ namespace BlazorEcommerce.Server.Services.ProductService
 		private async Task<List<Product>> FindProductsBySearchText(string searchText)
 		{
 			return await _context.Products
-						.Where(p => p.Name.ToLower().Contains(searchText.ToLower())
-						||
-						p.Description.ToLower().Contains(searchText.ToLower()))
-						.Include(p => p.Varients)
+						.Where(p => p.Visible && !p.Deleted &&
+							p.Name.ToLower().Contains(searchText.ToLower())||
+							p.Description.ToLower().Contains(searchText.ToLower()))
+						.Include(p => p.Varients.Where(v => v.Visible && !v.Deleted))
 						.ToListAsync();
 		}
 	}

@@ -1,5 +1,6 @@
 ﻿using BlazorEcommerce.Shared;
 using BlazorEcommerce.Shared.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
@@ -12,6 +13,7 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 	public class ProductService : IProductService
 	{
 		public List<Product> Products { get; set; } = new List<Product>();
+		public List<Product> AdminProducts { get; set; } = new List<Product>();
 		public string Message { get; set; }
 		public int CurrentPage { get; set; }
 		public int PageCount { get; set; }
@@ -106,6 +108,57 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 			{
 				return result.Data;
 			}
+		}
+
+		public async Task GetAdminProductsAsync()
+		{
+			var result = await _httpClient.GetFromJsonAsync<ServiceResponse<List<Product>>>("api/product/admin-get");
+
+			if (result != null && result.Data != null)
+				AdminProducts = result.Data;
+			else
+				AdminProducts = new List<Product>();
+
+			CurrentPage = 1;
+			PageCount = 1;
+
+			if (AdminProducts == null || AdminProducts.Count <= 0)
+				Message = "No Products Found";
+
+			ProductsChanged.Invoke();
+		}
+
+		public async Task<Product> CreateProduct(Product newProduct)
+		{
+			var result = await _httpClient.PostAsJsonAsync("api/products/create", newProduct);
+			var product = (await result.Content.ReadFromJsonAsync<ServiceResponse<Product>>()).Data;
+
+			if(product == null)
+				return new Product();
+			else
+				return product;
+		}
+
+		public async Task<Product> UpdateProduct(Product updateProduct)
+		{
+			var result = await _httpClient.PutAsJsonAsync("api/products/update", updateProduct);
+			var product = (await result.Content.ReadFromJsonAsync<ServiceResponse<Product>>()).Data;
+
+			if (product == null)
+				return new Product();
+			else
+				return product;
+		}
+
+		public async Task<Product> DeleteProduct(Product deleteProduct)
+		{
+			var result = await _httpClient.DeleteAsync($"api/products/delete/{deleteProduct.Id}");
+			var product = (await result.Content.ReadFromJsonAsync<ServiceResponse<Product>>()).Data;
+
+			if (product == null)
+				return new Product();
+			else
+				return product;
 		}
 	}
 }

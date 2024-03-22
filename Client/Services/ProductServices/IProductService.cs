@@ -8,6 +8,7 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 		event Action ProductsChanged;
 		string Message {  get; set; }
 		List<Product> Products { get; set; }
+		List<Product> AdminProducts { get; set; }
 		int CurrentPage { get; set; }
 		int PageCount { get; set; }
 		string CurrentSearchText { get; set; }
@@ -16,5 +17,9 @@ namespace BlazorEcommerce.Client.Services.ProductServices
 		Task<ServiceResponse<Product>> GetProductbyIdAsync(int productId);
 		Task SearchProducts(string searchText, int page);
 		Task<List<string>> GetProductSearchSuggestions(string searchText);
+		Task GetAdminProductsAsync();
+		Task<Product> CreateProduct(Product newProduct);
+		Task<Product> UpdateProduct(Product updateProduct);
+		Task<Product> DeleteProduct(Product deleteProduct);
 	}
 }
